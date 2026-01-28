@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mychat - Modern Chat App</title>
+    <title>GiveChat - Modern Chat App</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -871,7 +871,7 @@
     <div class="app-container">
         <!-- Sidebar -->
         <div class="sidebar">
-            <div class="logo">CB</div>
+            <div class="logo">GC</div>
             <button class="nav-item active" data-view="chats" title="Chats">💬</button>
             <button class="nav-item" data-view="friends" title="Friends">👥</button>
             <button class="nav-item" data-view="requests" title="Requests">
@@ -917,7 +917,7 @@
             <div class="messages-container" id="messagesContainer">
                 <div class="welcome-screen">
                     <div class="welcome-icon">💬</div>
-                    <h2>Welcome to ChatBuddy</h2>
+                    <h2>Welcome to GiveChat</h2>
                     <p>Select a chat to start messaging</p>
                 </div>
             </div>
@@ -941,7 +941,7 @@
     <div class="modal active" id="loginModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Welcome to ChatBuddy</h3>
+                <h3>Welcome to GiveChat</h3>
             </div>
             <div class="form-group">
                 <label>Username</label>
@@ -1034,8 +1034,8 @@
 
     <script>
         // ==================== CONFIG ====================
-        const SUPABASE_URL = 'https://bsoldkpvotruixsgmpso.supabase.co'; // Replace with your Supabase URL
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzb2xka3B2b3RydWl4c2dtcHNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1OTM4OTIsImV4cCI6MjA4NTE2OTg5Mn0.1cad3C7KIAD0wAvdMO6ZiMBQvzgVJvm5D6pIX9TwYy8'; // Replace with your Supabase Anon Key
+        const SUPABASE_URL = 'https://bsoldkpvotruixsgmpso.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_v-nORPDHj8U9SHvfe5bQTw_5Bj6BQDa';
         
         const STUN_SERVERS = {
             iceServers: [
@@ -1056,15 +1056,14 @@
         let remoteStream = null;
         let supabase = null;
 
-        // ==================== SUPABASE INIT ====================
-        function initSupabase() {
-            // Initialize Supabase client
-            // For demo purposes, using localStorage
-            const stored = localStorage.getItem('chatbuddy_user');
+        // ==================== INITIALIZATION ====================
+        function initApp() {
+            const stored = localStorage.getItem('givechat_user');
             if (stored) {
                 currentUser = JSON.parse(stored);
                 closeModal('loginModal');
                 loadContacts();
+                loadDemoData();
             }
         }
 
@@ -1099,7 +1098,7 @@
         }
 
         function saveAndStart() {
-            localStorage.setItem('chatbuddy_user', JSON.stringify(currentUser));
+            localStorage.setItem('givechat_user', JSON.stringify(currentUser));
             closeModal('loginModal');
             loadContacts();
             loadDemoData();
@@ -1107,14 +1106,14 @@
 
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('chatbuddy_user');
+                localStorage.removeItem('givechat_user');
                 location.reload();
             }
         }
 
         // ==================== CONTACTS ====================
         function loadContacts() {
-            contacts = JSON.parse(localStorage.getItem('chatbuddy_contacts') || '[]');
+            contacts = JSON.parse(localStorage.getItem('givechat_contacts') || '[]');
             renderContacts();
         }
 
@@ -1257,57 +1256,11 @@
             input.value = '';
             renderMessages();
             renderContacts();
-
-            // Simulate typing and response
-            showTypingIndicator();
-        }
-
-        function showTypingIndicator() {
-            const container = document.getElementById('messagesContainer');
-            const typing = document.createElement('div');
-            typing.className = 'typing-indicator active';
-            typing.innerHTML = `
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-            `;
-            container.appendChild(typing);
-            container.scrollTop = container.scrollHeight;
-
-            setTimeout(() => {
-                typing.remove();
-                simulateReply();
-            }, 2000);
-        }
-
-        function simulateReply() {
-            const replies = [
-                "That's great! 😊",
-                "I agree with you",
-                "Tell me more about it",
-                "Sounds interesting!",
-                "Got it, thanks!",
-                "👍"
-            ];
-
-            const message = {
-                id: 'msg_' + Date.now(),
-                from: currentChat.id,
-                to: currentUser.id,
-                type: 'text',
-                content: replies[Math.floor(Math.random() * replies.length)],
-                timestamp: new Date().toISOString(),
-                read: false
-            };
-
-            messages[currentChat.id].push(message);
-            saveMessages();
-            renderMessages();
         }
 
         function saveMessages() {
-            localStorage.setItem('chatbuddy_messages', JSON.stringify(messages));
-            localStorage.setItem('chatbuddy_contacts', JSON.stringify(contacts));
+            localStorage.setItem('givechat_messages', JSON.stringify(messages));
+            localStorage.setItem('givechat_contacts', JSON.stringify(contacts));
         }
 
         // ==================== FILE HANDLING ====================
@@ -1373,7 +1326,6 @@
                 const offer = await peerConnection.createOffer();
                 await peerConnection.setLocalDescription(offer);
 
-                // In real app, send offer to other peer via Supabase
                 console.log('Call started');
             } catch (error) {
                 console.error('Error starting call:', error);
@@ -1450,7 +1402,7 @@
                 return;
             }
 
-            // In real app, send request via Supabase
+            // Add friend request
             friendRequests.push({
                 id: 'req_' + Date.now(),
                 from: username,
@@ -1556,7 +1508,7 @@
         }
 
         function saveUserData() {
-            localStorage.setItem('chatbuddy_user', JSON.stringify(currentUser));
+            localStorage.setItem('givechat_user', JSON.stringify(currentUser));
             closeModal('settingsModal');
             alert('Settings saved!');
         }
@@ -1622,12 +1574,51 @@
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
         });
 
-      
-
+        // ==================== DEMO DATA ====================
+        function loadDemoData() {
+            // Load saved data
+            messages = JSON.parse(localStorage.getItem('givechat_messages') || '{}');
+            
+            // Add demo contacts if none exist
+            if (contacts.length === 0) {
+                contacts = [
+                    {
+                        id: 'demo_1',
+                        name: 'Rahul Kumar',
+                        avatar: null,
+                        status: 'Online',
+                        lastMessage: 'Hey! How are you?'
+                    },
+                    {
+                        id: 'demo_2',
+                        name: 'Priya Sharma',
+                        avatar: null,
+                        status: 'Online',
+                        lastMessage: 'See you tomorrow!'
+                    },
+                    {
+                        id: 'demo_3',
+                        name: 'Amit Patel',
+                        avatar: null,
+                        status: 'Offline',
+                        lastMessage: 'Call me when free'
+                    }
+                ];
                 
+                saveContacts();
+            }
+            
+            renderContacts();
+        }
+
+        function saveContacts() {
+            localStorage.setItem('givechat_contacts', JSON.stringify(contacts));
+        }
+
+        // ==================== INIT ====================
         window.addEventListener('load', () => {
-            initSupabase();
+            initApp();
         });
     </script>
 </body>
-</html>  
+</html>
